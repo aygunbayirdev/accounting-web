@@ -69,7 +69,7 @@ export interface CreateInvoiceBody {
   dateUtc: string;
   currency: string;
   type: InvoiceTypeStr;
-  lines: Array<{ id?: 0; itemId: number; qty: number; unitPrice: number; vatRate: number }>;
+  lines: Array<{ id?: 0; itemId: number; qty: string; unitPrice: string; vatRate: number }>;
 }
 
 export interface CreateInvoiceResult { id: number; rowVersionBase64: string; }
@@ -82,6 +82,6 @@ export interface UpdateInvoiceBody {
   dateUtc: string;
   currency: string;
   type: InvoiceTypeStr;
-  lines: Array<{ id: number; itemId: number; qty: number; unitPrice: number; vatRate: number }>;
+  lines: Array<{ id: number; itemId: number; qty: string; unitPrice: string; vatRate: number }>;
 }
 
