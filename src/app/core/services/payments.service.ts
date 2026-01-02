@@ -23,6 +23,7 @@ export class PaymentsService {
     }
 
     create(body: {
+        branchId: number;
         accountId: number;
         contactId?: number | null;
         linkedInvoiceId?: number | null;
