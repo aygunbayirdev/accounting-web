@@ -1,8 +1,8 @@
 /**
- * Branch Models (Şubeler)
+ * Warehouse Models (Depolar)
  * 
  * Backend DTO'larıyla senkronize.
- * @see Accounting.Application.Branches.Queries.Dto.BranchDtos
+ * @see Accounting.Application.Warehouses.Dto.WarehouseDtos
  */
 
 // ============================================================================
@@ -10,33 +10,38 @@
 // ============================================================================
 
 /**
- * Branch DTO (Read)
- * Backend: BranchDto
+ * Warehouse DTO (Read)
+ * Backend: WarehouseDto
  */
-export interface BranchDto {
+export interface WarehouseDto {
   id: number;
+  branchId: number;
   code: string;
   name: string;
-  rowVersionBase64: string;         // Base64
+  isDefault: boolean;               // Varsayılan depo mu?
+  rowVersion: string;               // Base64
+  createdAtUtc: string;             // ISO-8601 UTC
+  updatedAtUtc?: string | null;     // ISO-8601 UTC
 }
 
 /**
- * Branch List Item (Same as detail)
+ * Warehouse List Item DTO (Same as detail for now)
  */
-export type BranchListItemDto = BranchDto;
+export type WarehouseListItemDto = WarehouseDto;
 
 // ============================================================================
 // QUERY PARAMS
 // ============================================================================
 
 /**
- * List Branches Query Parameters
- * Backend: ListBranchesQuery
+ * List Warehouses Query Parameters
+ * Backend: ListWarehousesQuery
  */
-export interface ListBranchesQuery {
+export interface ListWarehousesQuery {
   pageNumber?: number;
   pageSize?: number;
   sort?: string;                    // "name:asc", "code:desc"
+  branchId?: number | null;
 }
 
 // ============================================================================
@@ -44,21 +49,25 @@ export interface ListBranchesQuery {
 // ============================================================================
 
 /**
- * Create Branch Body
- * Backend: CreateBranchCommand
+ * Create Warehouse Body
+ * Backend: CreateWarehouseCommand
  */
-export interface CreateBranchBody {
+export interface CreateWarehouseBody {
+  branchId: number;
   code: string;
   name: string;
+  isDefault: boolean;
 }
 
 /**
- * Update Branch Body
- * Backend: UpdateBranchCommand
+ * Update Warehouse Body
+ * Backend: UpdateWarehouseCommand
  */
-export interface UpdateBranchBody {
+export interface UpdateWarehouseBody {
   id: number;
   rowVersionBase64: string;         // Required for optimistic concurrency
+  branchId: number;
   code: string;
   name: string;
+  isDefault: boolean;
 }
