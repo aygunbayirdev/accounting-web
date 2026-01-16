@@ -1,10 +1,9 @@
 /**
  * Stock Movements Service
- * 
- * Backend API Controller: StockMovementsController
+ * Backend: StockMovementsController + StockTransfersController
  * @see Accounting.Api.Controllers.StockMovementsController
+ * @see Accounting.Api.Controllers.StockTransfersController
  */
-
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -21,6 +20,7 @@ import { PagedResult } from '../models/paged-result';
 export class StockMovementsService {
   private http = inject(HttpClient);
   private baseUrl = `${environment.apiBaseUrl}/stock-movements`;
+  private transferUrl = `${environment.apiBaseUrl}/stock-transfers`;
 
   /**
    * POST /api/stock-movements
@@ -52,24 +52,12 @@ export class StockMovementsService {
     if (query.sort) params = params.set('sort', query.sort);
     return this.http.get<PagedResult<StockMovementDto>>(this.baseUrl, { params });
   }
-}
-
-/**
- * Stock Transfers Service
- * 
- * Backend API Controller: StockTransfersController
- * @see Accounting.Api.Controllers.StockTransfersController
- */
-@Injectable({ providedIn: 'root' })
-export class StockTransfersService {
-  private http = inject(HttpClient);
-  private baseUrl = `${environment.apiBaseUrl}/stock-transfers`;
 
   /**
    * POST /api/stock-transfers
    * Transfer stock between warehouses
    */
   transfer(body: TransferStockBody): Observable<void> {
-    return this.http.post<void>(this.baseUrl, body);
+    return this.http.post<void>(this.transferUrl, body);
   }
 }
