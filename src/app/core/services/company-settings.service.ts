@@ -1,6 +1,6 @@
 /**
- * Items Service
- * Backend: ItemsController
+ * CompanySettings Service
+ * Backend: CompanySettingsController
  */
 
 import { Injectable, inject } from '@angular/core';
@@ -10,9 +10,9 @@ import { environment } from '../../../environments/environment';
 import { PagedResult } from '../models/paged-result';
 
 @Injectable({ providedIn: 'root' })
-export class ItemsService {
+export class CompanySettingsService {
   private http = inject(HttpClient);
-  private baseUrl = `${environment.apiBaseUrl}/items`;
+  private baseUrl = `${environment.apiBaseUrl}/company-settings`;
 
   // TODO: Add specific methods based on controller endpoints
   // Template methods below - customize as needed:

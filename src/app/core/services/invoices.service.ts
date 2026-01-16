@@ -1,33 +1,48 @@
-import { Injectable } from "@angular/core";
-import { HttpClient, HttpParams } from "@angular/common/http";
-import { environment } from "../../../environments/environment";
-import { PagedResult } from "../models/paged-result";
-import { CreateInvoiceBody, CreateInvoiceResult, InvoiceDto, InvoiceListItem, ListInvoicesQuery, UpdateInvoiceBody } from "../models/invoice.models";
-import { Observable } from "rxjs";
+/**
+ * Invoices Service
+ * Backend: InvoicesController
+ */
+
+import { Injectable, inject } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
+import { PagedResult } from '../models/paged-result';
 
 @Injectable({ providedIn: 'root' })
 export class InvoicesService {
-    private baseUrl = `${environment.apiBaseUrl}/invoices`;
-    constructor(private http: HttpClient) { }
+  private http = inject(HttpClient);
+  private baseUrl = `${environment.apiBaseUrl}/invoices`;
 
-    list(q: ListInvoicesQuery) {
-        let params = new HttpParams();
-        Object.entries(q).forEach(([k, v]) => {
-            if (v !== undefined && v !== null && v !== '')
-                params = params.set(k, String(v));
-        });
-        return this.http.get<PagedResult<InvoiceListItem>>(this.baseUrl, { params });
-    }
+  // TODO: Add specific methods based on controller endpoints
+  // Template methods below - customize as needed:
 
-    getById(id: number): Observable<InvoiceDto> {
-        return this.http.get<InvoiceDto>(`${this.baseUrl}/${id}`);
-    }
+  getById(id: number): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/${id}`);
+  }
 
-    create(body: CreateInvoiceBody): Observable<CreateInvoiceResult> {
-        return this.http.post<CreateInvoiceResult>(this.baseUrl, body);
+  list(params?: any): Observable<any> {
+    let httpParams = new HttpParams();
+    if (params) {
+      Object.keys(params).forEach(key => {
+        if (params[key] != null) {
+          httpParams = httpParams.set(key, params[key].toString());
+        }
+      });
     }
+    return this.http.get<any>(this.baseUrl, { params: httpParams });
+  }
 
-    update(body: UpdateInvoiceBody): Observable<InvoiceDto> {
-        return this.http.put<InvoiceDto>(`${this.baseUrl}/${body.id}`, body);
-    }
+  create(body: any): Observable<any> {
+    return this.http.post<any>(this.baseUrl, body);
+  }
+
+  update(id: number, body: any): Observable<any> {
+    return this.http.put<any>(`${this.baseUrl}/${id}`, body);
+  }
+
+  delete(id: number, rowVersion?: string): Observable<void> {
+    const body = rowVersion ? { rowVersion } : undefined;
+    return this.http.delete<void>(`${this.baseUrl}/${id}`, { body });
+  }
 }

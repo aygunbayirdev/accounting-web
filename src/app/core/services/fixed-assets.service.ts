@@ -1,56 +1,48 @@
-// src/app/shared/api/fixed-assets-api.service.ts
-import { environment } from "../../../environments/environment";
+/**
+ * FixedAssets Service
+ * Backend: FixedAssetsController
+ */
+
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import {
-  FixedAssetListItemDto,
-  FixedAssetDetailDto,
-  ListFixedAssetsQuery,
-  CreateFixedAssetCommand,
-  UpdateFixedAssetCommand,
-  DeleteFixedAssetCommand
-} from '../models/fixed-asset.models';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 import { PagedResult } from '../models/paged-result';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class FixedAssetsService {
-  private readonly http = inject(HttpClient);
-  private readonly baseUrl = `${environment.apiBaseUrl}/fixedassets`;
+  private http = inject(HttpClient);
+  private baseUrl = `${environment.apiBaseUrl}/fixed-assets`;
 
-  list(query: ListFixedAssetsQuery) {
-    return this.http.get<PagedResult<FixedAssetListItemDto>>(this.baseUrl, {
-      params: {
-        pageNumber: (query.pageNumber ?? 1).toString(),
-        pageSize: (query.pageSize ?? 20).toString(),
-        search: query.search ?? '',
-        includeDeleted: (query.includeDeleted ?? false).toString()
-      }
-    });
+  // TODO: Add specific methods based on controller endpoints
+  // Template methods below - customize as needed:
+
+  getById(id: number): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/${id}`);
   }
 
-  getById(id: number) {
-    return this.http.get<FixedAssetDetailDto>(`${this.baseUrl}/${id}`);
+  list(params?: any): Observable<any> {
+    let httpParams = new HttpParams();
+    if (params) {
+      Object.keys(params).forEach(key => {
+        if (params[key] != null) {
+          httpParams = httpParams.set(key, params[key].toString());
+        }
+      });
+    }
+    return this.http.get<any>(this.baseUrl, { params: httpParams });
   }
 
-  create(command: CreateFixedAssetCommand) {
-    return this.http.post<FixedAssetDetailDto>(this.baseUrl, command);
+  create(body: any): Observable<any> {
+    return this.http.post<any>(this.baseUrl, body);
   }
 
-  update(command: UpdateFixedAssetCommand) {
-    return this.http.put<FixedAssetDetailDto>(
-      `${this.baseUrl}/${command.id}`,
-      command
-    );
+  update(id: number, body: any): Observable<any> {
+    return this.http.put<any>(`${this.baseUrl}/${id}`, body);
   }
 
-  softDelete(command: DeleteFixedAssetCommand) {
-    return this.http.delete<void>(
-      `${this.baseUrl}/${command.id}`,
-      {
-        body: command
-      }
-    );
+  delete(id: number, rowVersion?: string): Observable<void> {
+    const body = rowVersion ? { rowVersion } : undefined;
+    return this.http.delete<void>(`${this.baseUrl}/${id}`, { body });
   }
 }
