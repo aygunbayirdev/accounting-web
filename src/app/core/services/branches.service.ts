@@ -1,10 +1,8 @@
 /**
  * Branches Service
- * 
- * Backend API Controller: BranchesController
+ * Backend: BranchesController
  * @see Accounting.Api.Controllers.BranchesController
  */
-
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -22,7 +20,6 @@ export class BranchesService {
 
   /**
    * POST /api/branches
-   * Create a new branch
    */
   create(body: CreateBranchBody): Observable<BranchDto> {
     return this.http.post<BranchDto>(this.baseUrl, body);
@@ -30,7 +27,6 @@ export class BranchesService {
 
   /**
    * GET /api/branches/{id}
-   * Get branch by ID
    */
   getById(id: number): Observable<BranchDto> {
     return this.http.get<BranchDto>(`${this.baseUrl}/${id}`);
@@ -38,7 +34,6 @@ export class BranchesService {
 
   /**
    * GET /api/branches
-   * List all branches (no pagination in backend)
    */
   list(): Observable<BranchDto[]> {
     return this.http.get<BranchDto[]>(this.baseUrl);
@@ -46,7 +41,6 @@ export class BranchesService {
 
   /**
    * PUT /api/branches/{id}
-   * Update existing branch
    */
   update(id: number, body: UpdateBranchBody): Observable<BranchDto> {
     return this.http.put<BranchDto>(`${this.baseUrl}/${id}`, body);
@@ -54,12 +48,11 @@ export class BranchesService {
 
   /**
    * DELETE /api/branches/{id}
-   * Delete branch
-   * Note: Backend uses query param for rowVersion
+   * NOTE: Backend uses query param for rowVersion, not body!
    */
   delete(id: number, rowVersion: string): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`, {
-      params: { rowVersion }  // ⚠️ Query param, body değil!
+      params: { rowVersion }
     });
   }
 }
