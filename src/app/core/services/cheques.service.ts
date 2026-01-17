@@ -1,48 +1,40 @@
 /**
  * Cheques Service
  * Backend: ChequesController
+ * @see Accounting.Api.Controllers.ChequesController
  */
-
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { PagedResult } from '../models/paged-result';
+import {
+  CreateChequeBody,
+  EndorseChequeBody
+} from '../models/cheque.models';
 
 @Injectable({ providedIn: 'root' })
 export class ChequesService {
   private http = inject(HttpClient);
   private baseUrl = `${environment.apiBaseUrl}/cheques`;
 
-  // TODO: Add specific methods based on controller endpoints
-  // Template methods below - customize as needed:
-
-  getById(id: number): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/${id}`);
+  /**
+   * POST /api/cheques
+   */
+  create(body: CreateChequeBody): Observable<{ id: number }> {
+    return this.http.post<{ id: number }>(this.baseUrl, body);
   }
 
-  list(params?: any): Observable<any> {
-    let httpParams = new HttpParams();
-    if (params) {
-      Object.keys(params).forEach(key => {
-        if (params[key] != null) {
-          httpParams = httpParams.set(key, params[key].toString());
-        }
-      });
-    }
-    return this.http.get<any>(this.baseUrl, { params: httpParams });
+  /**
+   * PUT /api/cheques/{id}/status
+   */
+  updateStatus(id: number, status: string, rowVersionBase64: string): Observable<void> {
+    return this.http.put<void>(`${this.baseUrl}/${id}/status`, { status, rowVersionBase64 });
   }
 
-  create(body: any): Observable<any> {
-    return this.http.post<any>(this.baseUrl, body);
-  }
-
-  update(id: number, body: any): Observable<any> {
-    return this.http.put<any>(`${this.baseUrl}/${id}`, body);
-  }
-
-  delete(id: number, rowVersion?: string): Observable<void> {
-    const body = rowVersion ? { rowVersion } : undefined;
-    return this.http.delete<void>(`${this.baseUrl}/${id}`, { body });
+  /**
+   * POST /api/cheques/{id}/endorse
+   */
+  endorse(id: number, body: EndorseChequeBody): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/${id}/endorse`, body);
   }
 }
