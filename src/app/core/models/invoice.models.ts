@@ -1,8 +1,10 @@
 /**
  * Invoice Models
  * 
- * Backend DTO'larıyla senkronize.
+ * Backend ile 1:1 senkronize - 2026-01-18
  * @see Accounting.Application.Invoices.Queries.Dto.InvoiceDtos
+ * @see Accounting.Application.Invoices.Commands.Create.CreateInvoiceCommand
+ * @see Accounting.Application.Invoices.Commands.Update.UpdateInvoiceCommand
  */
 
 // ============================================================================
@@ -36,16 +38,16 @@ export enum InvoiceTypeFilter {
  */
 export interface InvoiceLineDto {
   id: number;
-  itemId?: number | null;
-  expenseDefinitionId?: number | null;
+  itemId: number | null;
+  expenseDefinitionId: number | null;
   itemCode: string;
   itemName: string;
   unit: string;
-  qty: string;                    // F3 - Money string
-  unitPrice: string;              // F4 - Money string
+  qty: string;                    // F3 - Money string (QuantityJsonConverter)
+  unitPrice: string;              // F4 - Money string (UnitPriceJsonConverter)
   vatRate: number;                // Percentage (0-100)
-  discountRate: string;           // F2 - Money string
-  discountAmount: string;         // F2 - Money string
+  discountRate: string;           // F2 - Money string (PercentJsonConverter)
+  discountAmount: string;         // F2 - Money string (AmountJsonConverter)
   net: string;                    // F2 - Money string
   vat: string;                    // F2 - Money string
   withholdingRate: number;        // Percentage (0-100)
@@ -56,14 +58,14 @@ export interface InvoiceLineDto {
 
 /**
  * Invoice Detail DTO (Read)
- * Backend: InvoiceDto
+ * Backend: InvoiceDetailDto
  */
-export interface InvoiceDto {
+export interface InvoiceDetailDto {
   id: number;
   contactId: number;
   contactCode: string;
   contactName: string;
-  dateUtc: string;                // ISO-8601 UTC
+  dateUtc: string;                // ISO-8601 UTC (DateTime)
   invoiceNumber: string;
   currency: string;               // "TRY", "USD", "EUR"
   
@@ -79,21 +81,21 @@ export interface InvoiceDto {
   // Lines
   lines: InvoiceLineDto[];
   
-  // Metadata
-  rowVersion: string;             // Base64
-  createdAtUtc: string;           // ISO-8601 UTC
-  updatedAtUtc?: string | null;   // ISO-8601 UTC
-  
   // Type & Branch
-  type: number;                   // InvoiceType enum as int
+  type: number;                   // InvoiceType enum (1-4)
   branchId: number;
   branchCode: string;
   branchName: string;
   
   // Optional fields
-  waybillNumber?: string | null;      // İrsaliye numarası
-  waybillDateUtc?: string | null;     // ISO-8601 UTC
-  paymentDueDateUtc?: string | null;  // ISO-8601 UTC - Vade tarihi
+  waybillNumber: string | null;
+  waybillDateUtc: string | null;      // ISO-8601 UTC
+  paymentDueDateUtc: string | null;   // ISO-8601 UTC
+  
+  // Audit
+  rowVersion: string;             // Base64
+  createdAtUtc: string;           // ISO-8601 UTC
+  updatedAtUtc: string | null;    // ISO-8601 UTC
 }
 
 /**
@@ -105,17 +107,19 @@ export interface InvoiceListItemDto {
   contactId: number;
   contactCode: string;
   contactName: string;
-  type: string;                   // "Sales" | "Purchase" | "SalesReturn" | "PurchaseReturn"
+  invoiceNumber: string;
+  type: number;                   // InvoiceType enum (1-4)
   dateUtc: string;                // ISO-8601 UTC
   currency: string;
   totalNet: string;               // F2
   totalVat: string;               // F2
   totalGross: string;             // F2
   balance: string;                // F2 - Kalan bakiye
-  createdAtUtc: string;           // ISO-8601 UTC
   branchId: number;
   branchCode: string;
   branchName: string;
+  createdAtUtc: string;           // ISO-8601 UTC
+  updatedAtUtc: string | null;    // ISO-8601 UTC
 }
 
 // ============================================================================
@@ -132,7 +136,7 @@ export interface ListInvoicesQuery {
   sort?: string;                      // "dateUtc:desc", "totalNet:asc"
   branchId?: number | null;
   contactId?: number | null;
-  type?: InvoiceTypeFilter;
+  type?: number;                      // InvoiceTypeFilter (0-4)
   dateFromUtc?: string | null;        // ISO-8601 UTC
   dateToUtc?: string | null;          // ISO-8601 UTC
 }
@@ -143,111 +147,106 @@ export interface ListInvoicesQuery {
 
 /**
  * Create Invoice Line Body
- * Backend: CreateInvoiceRequest.LineDto
+ * Backend: CreateInvoiceLineDto
  */
-export interface CreateInvoiceLineBody {
-  id: 0;                              // Always 0 for new lines
-  itemId?: number | null;
-  expenseDefinitionId?: number | null;
-  qty: string;                        // Money string (dot separator!)
-  unitPrice: string;                  // Money string (dot separator!)
-  vatRate: number;
-  discountRate?: string;              // Money string (dot separator!)
-  discountAmount?: string;            // Money string (dot separator!)
-  withholdingRate?: number;
+export interface CreateInvoiceLineDto {
+  itemId: number | null;
+  expenseDefinitionId: number | null;
+  qty: string;                        // F3 - Money string
+  unitPrice: string;                  // F4 - Money string
+  vatRate: number;                    // 0-100
+  discountRate: string | null;        // F2 - Money string (optional)
+  withholdingRate: number | null;     // 0-100 (optional)
+}
+
+/**
+ * Create Invoice Command Body
+ * Backend: CreateInvoiceCommand
+ */
+export interface CreateInvoiceCommand {
+  contactId: number;
+  dateUtc: string;                    // ISO-8601 UTC
+  currency: string;                   // "TRY", "USD", "EUR"
+  lines: CreateInvoiceLineDto[];
+  type: number;                       // InvoiceType enum (1-4)
+  waybillNumber: string | null;
+  waybillDateUtc: string | null;      // ISO-8601 UTC
+  paymentDueDateUtc: string | null;   // ISO-8601 UTC
+}
+
+/**
+ * Create Invoice Result
+ * Backend: CreateInvoiceResult
+ */
+export interface CreateInvoiceResult {
+  id: number;
+  totalNet: string;                   // F2
+  totalVat: string;                   // F2
+  totalGross: string;                 // F2
+  roundingPolicy: string;
 }
 
 /**
  * Update Invoice Line Body
- * Backend: UpdateInvoiceRequest.LineDto
+ * Backend: UpdateInvoiceLineDto
  */
-export interface UpdateInvoiceLineBody {
-  id: number;                         // Existing line ID (or 0 for new)
-  itemId?: number | null;
-  expenseDefinitionId?: number | null;
-  qty: string;                        // Money string (dot separator!)
-  unitPrice: string;                  // Money string (dot separator!)
-  vatRate: number;
-  discountRate?: string;              // Money string (dot separator!)
-  discountAmount?: string;            // Money string (dot separator!)
-  withholdingRate?: number;
+export interface UpdateInvoiceLineDto {
+  id: number;                         // 0 for new lines, >0 for existing
+  itemId: number | null;
+  expenseDefinitionId: number | null;
+  qty: string;                        // F3 - Money string
+  unitPrice: string;                  // F4 - Money string
+  vatRate: number;                    // 0-100
+  discountRate: string | null;        // F2 - Money string (optional)
+  withholdingRate: number | null;     // 0-100 (optional)
 }
 
 /**
- * Create Invoice Body
- * Backend: CreateInvoiceRequest
+ * Update Invoice Command Body
+ * Backend: UpdateInvoiceCommand
  */
-export interface CreateInvoiceBody {
-  branchId: number;
-  contactId: number;
+export interface UpdateInvoiceCommand {
+  id: number;
+  rowVersionBase64: string;           // Base64 string
   dateUtc: string;                    // ISO-8601 UTC
   currency: string;                   // "TRY", "USD", "EUR"
-  type: InvoiceType | InvoiceTypeStr; // Enum or string
-  invoiceNumber?: string;
-  waybillNumber?: string;
-  waybillDateUtc?: string;            // ISO-8601 UTC
-  paymentDueDateUtc?: string;         // ISO-8601 UTC
-  lines: CreateInvoiceLineBody[];
-}
-
-/**
- * Update Invoice Body
- * Backend: UpdateInvoiceRequest
- */
-export interface UpdateInvoiceBody {
-  id: number;
-  rowVersionBase64: string;           // Required for optimistic concurrency
-  branchId: number;
   contactId: number;
-  dateUtc: string;                    // ISO-8601 UTC
-  currency: string;                   // "TRY", "USD", "EUR"
-  type: InvoiceType | InvoiceTypeStr; // Enum or string
-  invoiceNumber?: string;
-  waybillNumber?: string;
-  waybillDateUtc?: string;            // ISO-8601 UTC
-  paymentDueDateUtc?: string;         // ISO-8601 UTC
-  lines: UpdateInvoiceLineBody[];
-}
-
-// ============================================================================
-// RESPONSE MODELS
-// ============================================================================
-
-/**
- * Create Invoice Response
- * Backend: CreateInvoiceResponse
- */
-export interface CreateInvoiceResult {
-  id: number;
-  rowVersionBase64: string;
-}
-
-// ============================================================================
-// HELPER TYPES
-// ============================================================================
-
-/**
- * Helper type for invoice type conversion
- */
-export function invoiceTypeToString(type: number): InvoiceTypeStr {
-  switch (type) {
-    case InvoiceType.Sales: return 'Sales';
-    case InvoiceType.Purchase: return 'Purchase';
-    case InvoiceType.SalesReturn: return 'SalesReturn';
-    case InvoiceType.PurchaseReturn: return 'PurchaseReturn';
-    default: return 'Sales';
-  }
+  type: number;                       // InvoiceType enum (1-4)
+  waybillNumber: string | null;
+  waybillDateUtc: string | null;      // ISO-8601 UTC
+  paymentDueDateUtc: string | null;   // ISO-8601 UTC
+  lines: UpdateInvoiceLineDto[];
 }
 
 /**
- * Helper type for invoice type conversion
+ * Delete Invoice Body
+ * Backend: SoftDeleteInvoiceCommand uses RowVersionDto
  */
-export function invoiceTypeToNumber(type: InvoiceTypeStr): InvoiceType {
-  switch (type) {
-    case 'Sales': return InvoiceType.Sales;
-    case 'Purchase': return InvoiceType.Purchase;
-    case 'SalesReturn': return InvoiceType.SalesReturn;
-    case 'PurchaseReturn': return InvoiceType.PurchaseReturn;
-    default: return InvoiceType.Sales;
-  }
+export interface DeleteInvoiceBody {
+  rowVersion: string;                 // Base64 string
 }
+
+// ============================================================================
+// HELPER TYPES (Frontend specific - not from backend)
+// ============================================================================
+
+/**
+ * Invoice Type Display Names (for UI)
+ */
+export const InvoiceTypeNames: Record<InvoiceType, string> = {
+  [InvoiceType.Sales]: 'Satış',
+  [InvoiceType.Purchase]: 'Alış',
+  [InvoiceType.SalesReturn]: 'Satış İade',
+  [InvoiceType.PurchaseReturn]: 'Alış İade'
+};
+
+/**
+ * Invoice Type Filter Display Names (for UI)
+ */
+export const InvoiceTypeFilterNames: Record<InvoiceTypeFilter, string> = {
+  [InvoiceTypeFilter.Any]: 'Tümü',
+  [InvoiceTypeFilter.Sales]: 'Satış',
+  [InvoiceTypeFilter.Purchase]: 'Alış',
+  [InvoiceTypeFilter.SalesReturn]: 'Satış İade',
+  [InvoiceTypeFilter.PurchaseReturn]: 'Alış İade'
+};
