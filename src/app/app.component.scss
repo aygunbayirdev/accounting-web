@@ -39,6 +39,19 @@
   font: var(--mat-sys-title-medium);
 }
 
+/* Simple User Info (toolbar'da direkt gösterme) */
+.user-info-simple {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  
+  .user-name {
+    color: white;
+    font-size: 14px;
+    font-weight: 500;
+  }
+}
+
 /* User Menu Styles */
 .user-menu-btn {
   margin-left: 8px;
