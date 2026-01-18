@@ -8,6 +8,7 @@ import { registerLocaleData } from '@angular/common';
 import { routes } from './app.routes';
 
 import { httpProblemInterceptor } from '../app/core/interceptors/http-problem-interceptor';
+import { authInterceptor } from '../app/core/interceptors/auth.interceptor';
 
 registerLocaleData(localeTr);
 
@@ -18,7 +19,10 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideHttpClient(
       withFetch(),
-      withInterceptors([httpProblemInterceptor])),
+      withInterceptors([
+        authInterceptor,          // Auth interceptor ÖNCE (token ekler)
+        httpProblemInterceptor    // Problem interceptor SONRA (hata yakalar)
+      ])),
     provideAnimations(),
     { provide: LOCALE_ID, useValue: 'tr' },
   ]
