@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ColDef } from 'ag-grid-community';
 import { ListGridComponent } from '../../shared/list-grid/list-grid.component';
 import { InvoicesService } from '../../core/services/invoices.service';
-import { InvoiceListItemDto } from '../../core/models/invoice.models';  // InvoiceListItem → InvoiceListItemDto
+import { InvoiceListItemDto } from '../../core/models/invoice.models';
 import { MatIconModule } from '@angular/material/icon';
 import { InvoiceActionsCell } from './invoice-actions.cell';
 import { MatButtonModule } from '@angular/material/button';
@@ -77,23 +77,73 @@ import { BranchesService } from '../../core/services/branches.service';
   `]
 })
 export class InvoicesPageComponent {
-  sortWhitelist = ['dateUtc', 'totalNet', 'totalVat', 'totalGross'];
+  sortWhitelist = ['dateUtc', 'totalNet', 'totalVat', 'totalGross', 'invoiceNumber'];
   branchId: number | null = null;
   branches: BranchDto[] = [];
 
   colDefs: ColDef<InvoiceListItemDto>[] = [
-    { field: 'dateUtc', headerName: 'Tarih (UTC)', sortable: true, valueFormatter: p => p.value ? new Date(p.value).toLocaleDateString() : '' },
-    { field: 'branchId', headerName: 'Şube Id', sortable: false, minWidth: 80 },
-    { field: 'branchCode', headerName: 'Şube Kodu', sortable: false, minWidth: 80 },
-    { field: 'branchName', headerName: 'Şube Adı', sortable: false, minWidth: 120 },
-    { field: 'contactCode', headerName: 'Cari Kodu', sortable: false, minWidth: 80 },
-    { field: 'contactName', headerName: 'Cari Adı', sortable: false, minWidth: 180 },
-    { field: 'type', headerName: 'Tür', sortable: false, maxWidth: 120 }, // Sales/Purchase    
-    { field: 'currency', headerName: 'Para Brm', sortable: false, maxWidth: 100 },
-    { field: 'totalNet', headerName: 'Net', sortable: true, type: 'rightAligned', minWidth: 120 },
-    { field: 'totalVat', headerName: 'KDV', sortable: true, type: 'rightAligned', minWidth: 120 },
+    // ID
+    { field: 'id', headerName: 'ID', sortable: true, maxWidth: 80, pinned: 'left' },
+    
+    // Invoice Info
+    { field: 'invoiceNumber', headerName: 'Fatura No', sortable: true, minWidth: 140, pinned: 'left' },
+    { 
+      field: 'type', 
+      headerName: 'Tür', 
+      sortable: true, 
+      maxWidth: 120,
+      valueFormatter: p => {
+        const typeMap: Record<number, string> = {
+          1: 'Satış',
+          2: 'Alış',
+          3: 'Satış İade',
+          4: 'Alış İade'
+        };
+        return typeMap[p.value as number] || p.value;
+      }
+    },
+    { 
+      field: 'dateUtc', 
+      headerName: 'Tarih', 
+      sortable: true, 
+      minWidth: 120,
+      valueFormatter: p => p.value ? new Date(p.value).toLocaleDateString('tr-TR') : '' 
+    },
+    
+    // Contact Info
+    { field: 'contactId', headerName: 'Cari ID', sortable: false, maxWidth: 90 },
+    { field: 'contactCode', headerName: 'Cari Kod', sortable: false, minWidth: 100 },
+    { field: 'contactName', headerName: 'Cari Adı', sortable: false, minWidth: 200 },
+    
+    // Branch Info
+    { field: 'branchId', headerName: 'Şube ID', sortable: false, maxWidth: 90 },
+    { field: 'branchCode', headerName: 'Şube Kod', sortable: false, minWidth: 100 },
+    { field: 'branchName', headerName: 'Şube Adı', sortable: false, minWidth: 150 },
+    
+    // Financial Info
+    { field: 'currency', headerName: 'Para Birimi', sortable: false, maxWidth: 100 },
+    { field: 'totalNet', headerName: 'Net Toplam', sortable: true, type: 'rightAligned', minWidth: 130 },
+    { field: 'totalVat', headerName: 'KDV Toplamı', sortable: true, type: 'rightAligned', minWidth: 130 },
     { field: 'totalGross', headerName: 'Genel Toplam', sortable: true, type: 'rightAligned', minWidth: 140 },
-    // 🔽 Aksiyonlar
+    { field: 'balance', headerName: 'Bakiye', sortable: true, type: 'rightAligned', minWidth: 120 },
+    
+    // Audit Info
+    { 
+      field: 'createdAtUtc', 
+      headerName: 'Oluşturulma', 
+      sortable: false, 
+      minWidth: 150,
+      valueFormatter: p => p.value ? new Date(p.value).toLocaleString('tr-TR') : '' 
+    },
+    { 
+      field: 'updatedAtUtc', 
+      headerName: 'Güncellenme', 
+      sortable: false, 
+      minWidth: 150,
+      valueFormatter: p => p.value ? new Date(p.value).toLocaleString('tr-TR') : '' 
+    },
+    
+    // Actions (pinned right)
     {
       headerName: '',
       field: 'id',
@@ -101,8 +151,8 @@ export class InvoicesPageComponent {
       pinned: 'right',
       sortable: false,
       filter: false,
-      suppressHeaderMenuButton: true,   // ✅ v34
-      cellRenderer: InvoiceActionsCell   // (Angular renderer’ı kullanıyoruz)
+      suppressHeaderMenuButton: true,
+      cellRenderer: InvoiceActionsCell
     }
   ];
 
@@ -137,6 +187,5 @@ export class InvoicesPageComponent {
     this.branchId = null;
     this.grid.reload();
   }
-
 
 }
