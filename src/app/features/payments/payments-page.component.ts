@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ColDef } from 'ag-grid-community';
 import { ListGridComponent } from '../../shared/list-grid/list-grid.component';
 import { PaymentsService } from '../../core/services/payments.service';
-import { PaymentListItem } from '../../core/models/payment.models';
+import { PaymentListItemDto } from '../../core/models/payment.models';
 
 @Component({
   standalone: true,
@@ -21,7 +21,7 @@ import { PaymentListItem } from '../../core/models/payment.models';
 export class PaymentsPageComponent {
   sortWhitelist = ['dateUtc', 'amount']; // BE whitelist
 
-  colDefs: ColDef<PaymentListItem>[] = [
+  colDefs: ColDef<PaymentListItemDto>[] = [
     { field: 'dateUtc', headerName: 'Tarih (UTC)', sortable: true, valueFormatter: p => p.value ? new Date(p.value).toLocaleDateString() : '' },
     { field: 'accountId', headerName: 'Hesap #', sortable: false, minWidth: 140 },
     { field: 'accountCode', headerName: 'Hesap Kodu', sortable: false, minWidth: 120 },

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ColDef } from 'ag-grid-community';
 import { ListGridComponent } from '../../shared/list-grid/list-grid.component';
 import { ItemsService } from '../../core/services/items.service';
-import { ItemListItem, ListItemsQuery } from '../../core/models/item.models';
+import { ItemListItemDto, ListItemsQuery } from '../../core/models/item.models';
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -62,12 +62,13 @@ export class ItemsPageComponent {
     // BE whitelist: code, name, vatrate, price
     sortWhitelist = ['code', 'name', 'vatrate', 'price'];
 
-    colDefs: ColDef<ItemListItem>[] = [
+    colDefs: ColDef<ItemListItemDto>[] = [
         { field: 'code', headerName: 'Kod', sortable: true, minWidth: 120 },
         { field: 'name', headerName: 'Ad', sortable: true, minWidth: 180 },
         { field: 'unit', headerName: 'Birim', sortable: false, maxWidth: 120 },
         { field: 'vatRate', headerName: 'KDV (%)', sortable: true, maxWidth: 120, type: 'rightAligned' },
-        { field: 'defaultUnitPrice', headerName: 'Birim Fiyat', sortable: true, type: 'rightAligned', minWidth: 140 },
+        { field: 'purchasePrice', headerName: 'Alış Fiyatı', sortable: true, type: 'rightAligned', minWidth: 140 },
+        { field: 'salesPrice', headerName: 'Satış Fiyatı', sortable: true, type: 'rightAligned', minWidth: 140 },
         { field: 'createdAtUtc', headerName: 'Oluşturma', sortable: false, valueFormatter: p => p.value ? new Date(p.value).toLocaleDateString() : '' }
     ];
 
@@ -76,7 +77,7 @@ export class ItemsPageComponent {
         search: null, unit: null, vatRate: null
     };
 
-    @ViewChild('grid') grid!: ListGridComponent<ItemListItem>; // ✅ template ref'i yakala
+    @ViewChild('grid') grid!: ListGridComponent<ItemListItemDto>; // ✅ template ref'i yakala
 
     constructor(private service: ItemsService) { }
 

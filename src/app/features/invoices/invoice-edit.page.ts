@@ -61,7 +61,7 @@ export class InvoicesEditPage {
           type: dto.type as any,
           lines: dto.lines.map(l => ({
             id: l.id,
-            itemId: l.itemId,
+            itemId: l.itemId ?? null,  // undefined → null dönüşümü
             itemCode: l.itemCode,
             itemName: l.itemName,
             unit: l.unit,
@@ -94,7 +94,7 @@ export class InvoicesEditPage {
   handleUpdate(body: any) {
     if (!this.id) return;
     body.id = this.id;
-    this.svc.update(body).subscribe({
+    this.svc.update(this.id, body).subscribe({  // id parametresi eklendi
       next: dto => {
         this.snack.open('Fatura güncellendi.', 'Kapat', { duration: 2000 });
         // yeni rowVersion + snapshot ile formu tazele
@@ -107,7 +107,7 @@ export class InvoicesEditPage {
           currency: dto.currency,
           type: dto.type as any,
           lines: dto.lines.map(l => ({
-            id: l.id, itemId: l.itemId, itemCode: l.itemCode, itemName: l.itemName, unit: l.unit,
+            id: l.id, itemId: l.itemId ?? null, itemCode: l.itemCode, itemName: l.itemName, unit: l.unit,  // undefined → null
             qty: l.qty, unitPrice: l.unitPrice, vatRate: l.vatRate,
             net: l.net, vat: l.vat, gross: l.gross
           }))

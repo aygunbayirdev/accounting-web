@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ColDef } from 'ag-grid-community';
 import { ListGridComponent } from '../../shared/list-grid/list-grid.component';
 import { InvoicesService } from '../../core/services/invoices.service';
-import { InvoiceListItem } from '../../core/models/invoice.models';
+import { InvoiceListItemDto } from '../../core/models/invoice.models';  // InvoiceListItem → InvoiceListItemDto
 import { MatIconModule } from '@angular/material/icon';
 import { InvoiceActionsCell } from './invoice-actions.cell';
 import { MatButtonModule } from '@angular/material/button';
@@ -81,7 +81,7 @@ export class InvoicesPageComponent {
   branchId: number | null = null;
   branches: BranchDto[] = [];
 
-  colDefs: ColDef<InvoiceListItem>[] = [
+  colDefs: ColDef<InvoiceListItemDto>[] = [
     { field: 'dateUtc', headerName: 'Tarih (UTC)', sortable: true, valueFormatter: p => p.value ? new Date(p.value).toLocaleDateString() : '' },
     { field: 'branchId', headerName: 'Şube Id', sortable: false, minWidth: 80 },
     { field: 'branchCode', headerName: 'Şube Kodu', sortable: false, minWidth: 80 },
@@ -106,7 +106,7 @@ export class InvoicesPageComponent {
     }
   ];
 
-  @ViewChild('grid') grid!: ListGridComponent<InvoiceListItem>;
+  @ViewChild('grid') grid!: ListGridComponent<InvoiceListItemDto>;
 
   constructor(
     private service: InvoicesService,
